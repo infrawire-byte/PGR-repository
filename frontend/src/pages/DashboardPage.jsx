@@ -1,25 +1,22 @@
-import { useEffect, useState } from 'react';
-import { api } from '../services/api';
+import React from "react";
+import { Link } from "react-router-dom";
 
-export default function DashboardPage(){
-  const [info, setInfo] = useState(null);
-  const [erro, setErro] = useState('');
-
-  useEffect(()=>{
-    api.get('/dashboard/summary')
-      .then(setInfo)
-      .catch(e=>setErro(e.message));
-  },[]);
-
+export default function DashboardPage() {
+  const user = JSON.parse(localStorage.getItem("user") || "{}");
   return (
-    <>
-      <h1>Dashboard</h1>
-      {erro && <div className="card">Erro: {erro}</div>}
-      <div className="row">
-        <div className="card">Representantes: {info?.reps ?? '...'}</div>
-        <div className="card">Lojas: {info?.stores ?? '...'}</div>
-        <div className="card">Visitas hoje: {info?.visitsToday ?? '...'}</div>
+    <div className="container">
+      <div className="card">
+        <h2>Dashboard</h2>
+        <p>Bem-vindo, {user.name || "Usuário"}.</p>
+        <div className="row mt-4">
+          <Link className="btn" to="/mapa">Mapa</Link>
+          <Link className="btn" to="/agenda">Agenda</Link>
+          <Link className="btn" to="/lojas">Lojas</Link>
+          <Link className="btn" to="/representantes">Representantes</Link>
+          <Link className="btn" to="/relatorios">Relatórios</Link>
+          <Link className="btn" to="/config">Configurações</Link>
+        </div>
       </div>
-    </>
+    </div>
   );
 }

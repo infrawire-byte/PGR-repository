@@ -1,39 +1,44 @@
-import { useState } from 'react';
-import '../assets/styles/LoginPage.css';
-import { api } from '../services/api.js';
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import api from "../api/client.js";
 
 export default function LoginPage() {
-  const [email, setEmail] = useState('');
-  const [senha, setSenha] = useState('');
-  const [erro, setErro] = useState('');
-  const [carregando, setCarregando] = useState(false);
+  const nav = useNavigate();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [err, setErr] = useState("");
 
-  async function onSubmit(e){
+  const handleLogin = async (e) => {
     e.preventDefault();
-    setErro('');
-    try{
-      setCarregando(true);
-      const { token } = await api.post('/auth/login', { email, senha });
-      localStorage.setItem('token', token);
-      window.location.href = '/'; // entra na área logada
-    }catch(err){
-      setErro(err.message || 'Falha no login');
-    }finally{
-      setCarregando(false);
+    setErr(""); setLoading(true);
+    try {
+      const { data } = await api.post("/api/auth/login", { email, password });
+      localStorage.setItem("token", data.token);
+      localStorage.setItem("user", JSON.stringify(data.user));
+      nav("/dashboard");
+    } catch (e) {
+      setErr(e?.response?.data?.error || "Falha no login");
+    } finally {
+      setLoading(false);
     }
-  }
+  };
 
   return (
-    <div className="login-container">
-      <div className="login-box">
-        <h1>Login</h1>
-        {erro && <div style={{color:'#fecaca', marginBottom:8}}>{erro}</div>}
-        <form onSubmit={onSubmit}>
-          <input className="input" type="email" placeholder="Email" value={email} onChange={e=>setEmail(e.target.value)} />
-          <input className="input" type="password" placeholder="Senha" value={senha} onChange={e=>setSenha(e.target.value)} />
-          <button className="btn" disabled={carregando}>{carregando ? 'Entrando...' : 'Entrar'}</button>
-        </form>
-      </div>
+    <div className="container" style={{ display: "grid", placeItems: "center", minHeight: "100vh" }}>
+      <form className="card" style={{ width: 420 }} onSubmit={handleLogin}>
+        <h2>Entrar</h2>
+        <div className="mt-4">
+          <label>E-mail</label>
+          <input className="input mt-2" type="email" value={email} onChange={(e)=>setEmail(e.target.value)} placeholder="seu@email.com" required />
+        </div>
+        <div className="mt-3">
+          <label>Senha</label>
+          <input className="input mt-2" type="password" value={password} onChange={(e)=>setPassword(e.target.value)} placeholder="••••••••" required />
+        </div>
+        {err && <div className="mt-3" style={{ color: "#f87171" }}>{err}</div>}
+        <button className="btn mt-4" disabled={loading}>{loading ? "Entrando..." : "Entrar"}</button>
+      </form>
     </div>
   );
 }
